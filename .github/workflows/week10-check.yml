@@ -1,0 +1,31 @@
+# 이 파일은 10주차의 자동 검사 지시서입니다. EC2 배포 명령은 아직 없습니다.
+name: Week 10 Notice Check
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      # 검사 대상 커밋의 파일을 Runner에 준비합니다.
+      - name: Get repository code
+        uses: actions/checkout@v7
+      # PC와 Runner가 같은 Node 주 버전을 사용하도록 지정합니다.
+      - name: Prepare Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      # 외부 패키지가 없으므로 npm install 없이 제공 검사를 실행합니다.
+      # 실패하면 Job이 FAIL이 됩니다. PASS는 이 검사 범위에 대한 결과입니다.
+      - name: Run HTML and HTTP checks
+        run: node --test tests/app.test.mjs
+      # PR Run과 main Push Run은 검사 대상이 다를 수 있습니다.
+      # 실제 배포에는 Merge 후 main Push Run의 전체 SHA를 선택합니다.
+      - name: Show the checked revision
+        run: git rev-parse HEAD
